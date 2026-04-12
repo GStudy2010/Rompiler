@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::utils::errorutils::{self, error_print};
+
 pub enum LexTokens {
     LBracket,
     RBracket,
@@ -17,12 +19,12 @@ impl Lexer {
         while self.i < self.origin_text.len() {
             let current = self.origin_text.chars().nth(self.i);
             match current {
-                Some('{') => {self.lex_tokens.push(LexTokens::LBracket); self.i += 1},
-                Some('}') => {self.lex_tokens.push(LexTokens::RBracket); self.i += 1},
+                Some('{')  => {self.lex_tokens.push(LexTokens::LBracket); self.i += 1},
+                Some('}')  => {self.lex_tokens.push(LexTokens::RBracket); self.i += 1},
+                Some('\n') => {self.i += 1},
                 None => break,
-                _ => {self.i += 1}
+                _ => {error_print(errorutils::ErrorCodes::ErrorInvalidCharLiteralInLexication, Some(&format!("token: {:?}", current.clone())));}
             }
-            println!("i: {}, self.origin_text.len(): {}, current: {:?}", self.i, self.origin_text.len(), current);
         }
     }
     pub fn print(&self) {
