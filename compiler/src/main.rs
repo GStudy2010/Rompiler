@@ -1,4 +1,7 @@
 use std::{env, fs};
+mod lexer {
+    pub mod main_lexer;
+}
 mod utils {
     pub mod fileutils;
     pub mod errorutils;
@@ -19,4 +22,7 @@ fn main() {
     }
     let contents: String = utils::fileutils::get_file_contents(program_name);
     println!("{}", contents);
+    let mut lexer = lexer::main_lexer::Lexer::new(contents.clone());
+    lexer.lex();
+    lexer.print();
 }
