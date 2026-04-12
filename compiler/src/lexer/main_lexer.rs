@@ -22,8 +22,8 @@ impl Lexer {
                 Some('{')  => {self.lex_tokens.push(LexTokens::LBracket); self.i += 1},
                 Some('}')  => {self.lex_tokens.push(LexTokens::RBracket); self.i += 1},
                 Some('\n') => {self.i += 1},
-                None => break,
-                _ => {error_print(errorutils::ErrorCodes::ErrorInvalidCharLiteralInLexication, Some(&format!("token: {:?}", current.clone())));}
+                None       => break,
+                _          => {error_print(errorutils::ErrorCodes::ErrorInvalidCharLiteralInLexication, Some(&format!("token: {:?}", current.clone())));}
             }
         }
     }
