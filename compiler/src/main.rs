@@ -1,4 +1,7 @@
 use std::{env, fs};
+mod parser {
+    pub mod main_parser;
+}
 mod lexer {
     pub mod main_lexer;
 }
@@ -25,4 +28,7 @@ fn main() {
     let mut lexer = lexer::main_lexer::Lexer::new(contents.clone());
     lexer.lex();
     lexer.print();
+    let mut parser = parser::main_parser::Parser::new(lexer.lex_tokens);
+    parser.parse();
+    parser.print();
 }
