@@ -1,0 +1,74 @@
+/*
+  ( End every line of a program with a '.' I don't use the ';' beacouse the coloring in my editor gets broken )
+
+
+  ( Registers to store info )
+  A, B, C, D             ( 8  bit registers )
+  RA, RB, RC, RD         ( 16 bit registers extending the 8  bit ones )
+  RAR, RBR, RCR, RDR     ( 32 bit registers extending the 16 bit ones )
+  RARX, RBRX, RCRX, RDRX ( 64 bit registers extending the 32 bit ones )
+
+  ( All registers take 64 bytes of memory which CPU cache can handle  )
+
+  ( Register Operations )
+
+  MOV A->B  ( Moves value from REG A to REG B, The A REG gets emptyfied after operation )
+  MOVR A->B ( The same as MOV operation but the A register stays with the same value    )
+
+  NOT A     ( Performes a NOT binary operation on every bit of the register             )
+  OR  A, B  ( Performes a OR  binary operation on every bit of the register             )
+  XOR A, B  ( Performes a XOR binary operation on every bit of the register             )
+  AND A, B  ( Performes a AND binary operation on every bit of the register             )
+
+  ( SYSCALLS )
+  ( Syscalls are invoked with the SYSC keyword and parameters which are some registers )
+  ( Possible Syscalls for now )
+
+  RARX -> 0, RBRX -> 0-255 ( An exit syscall RBRX register gives the exit code )
+
+  ( Practice program )
+*/
+_start:
+  MOV 0->RARX.
+  MOV 1->RBRX.
+  SYSC.
+
+/*
+  ( OPCODES FOR ASSEMBLER )
+
+          MOV : 0
+          MOVR: 1
+          NOT : 2
+          OR  : 3
+          XOR : 4
+          AND : 5
+          SYSC: 6
+
+  ( REGISTERS )
+
+     NREG: 0 
+     A   : 1
+     B   : 2
+     C   : 3
+     D   : 4
+     RA  : 5
+     RB  : 6
+     RC  : 7
+     RD  : 8
+     RAR : 9
+     RBR : 10
+     RCR : 11
+     RDR : 12
+     RARX: 13
+     RBRX: 14
+     RCRX: 15
+     RDRX: 16
+
+  ( INSTRUCTION FORMAT )
+  [OPCODE] [ARG1] [ARG2]
+  ( Example )
+
+  MOV A->B ==> [0] [1] [2]
+  ( This then gets encoded in .bin file )
+  ( Then after finishing with assembling I will be able to write a decoder that will emulate this program )
+*/
