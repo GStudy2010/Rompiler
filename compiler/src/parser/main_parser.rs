@@ -15,10 +15,17 @@ pub enum Block {
     LT(LifeTime),
 }
 
-pub enum Statment {}
+pub enum Statment {
+    SystemExit(SystemEx),
+}
 
 pub enum Expr {
     StrLit(StrLit),
+    Number(Num)
+}
+
+pub struct SystemEx {
+    value: Expr,
 }
 
 pub struct Mainfuncton {
@@ -32,6 +39,9 @@ pub struct Function {
 
 pub struct StrLit {
     name: String,
+}
+pub struct Num {
+    value: i32,
 }
 
 pub struct LifeTime {
@@ -89,13 +99,34 @@ impl Parser {
                 self.next_token(); // skip '{'
                 InLifeTime::B(Block::LT(self.parse_lifetime()))
             },
-            _ => error_print(ErrorCodes::ErrorInvalidInLifetimeStatment, Some(&("Invalid statement in lifetime").to_string())),
+            _ => {
+                let current_statment = self.parse_statment();
+                match current_statment {
+                    Statment::SystemExit(s) => {
+                        InLifeTime::S(Statment::SystemExit(s))
+                    }
+                }
+            }
         }
     }
-
+    fn parse_statment(&mut self) -> Statment {
+        match self.get_token() {
+            LexTokens::SysExit => {
+                self.next_token();
+                self.assert_next_token(LexTokens::LParen);
+                let value = self.parse_expr();
+                self.next_token();
+                self.assert_next_token(LexTokens::RParen);
+                self.assert_next_token(LexTokens::SemiC);
+                Statment::SystemExit(SystemEx { value })
+            }
+            _ => error_print(ErrorCodes::ErrorParsingError, Some(&("Not a statment").to_string())),
+        }
+    }
     fn parse_expr(&mut self) -> Expr {
         match self.get_token() {
             LexTokens::Str(s) => Expr::StrLit(StrLit { name: s }),
+            LexTokens::Num(n) => Expr::Number(Num { value: n }),
             _ => error_print(ErrorCodes::ErrorInvalidExpretion, Some(&("Expression not handled").to_string())),
         }
     }
@@ -142,6 +173,7 @@ impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Expr::StrLit(s) => write!(f, "{}", s.name),
+            Expr::Number(n) => write!(f, "{}", n.value),
         }
     }
 }
@@ -160,7 +192,7 @@ impl fmt::Display for InLifeTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             InLifeTime::B(b) => write!(f, "{}", b),
-            InLifeTime::S(_) => write!(f, "<statement>"),
+            InLifeTime::S(s) => write!(f, "{}", s),
         }
     }
 }
@@ -170,6 +202,13 @@ impl fmt::Display for Block {
         match self {
             Block::Func(func) => write!(f, "{}", func),
             Block::LT(lt)     => write!(f, "{}", lt),
+        }
+    }
+}
+impl fmt::Display for Statment {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Statment::SystemExit(s) => write!(f, "sysexit({});", s.value)
         }
     }
 }

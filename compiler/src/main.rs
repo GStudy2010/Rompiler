@@ -27,8 +27,10 @@ fn main() {
     println!("{}", contents);
     let mut lexer = lexer::main_lexer::Lexer::new(contents.clone());
     lexer.lex();
+    println!("\nLexer interpretation:\n");
     lexer.print();
     let mut parser = parser::main_parser::Parser::new(lexer.lex_tokens);
     parser.parse();
+    println!("\nParser interpretation:\n");
     parser.print();
 }

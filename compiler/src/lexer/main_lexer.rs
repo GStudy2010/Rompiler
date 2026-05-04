@@ -6,11 +6,12 @@ pub enum LexTokens {
     LBracket,
     RBracket,
     Fn,
-    KeyWord,
+    SysExit,
     LParen,
     RParen,
     Str(String),
     Num(i32),
+    SemiC,
 }
 
 pub struct Lexer {
@@ -32,6 +33,7 @@ impl Lexer {
                 '}'  => { self.lex_tokens.push(LexTokens::RBracket); self.i += 1; },
                 '('  => { self.lex_tokens.push(LexTokens::LParen); self.i += 1; },
                 ')'  => { self.lex_tokens.push(LexTokens::RParen); self.i += 1; },
+                ';'  => { self.lex_tokens.push(LexTokens::SemiC); self.i += 1; },
                 '\n' | ' ' | '\t' | '\r' => { self.i += 1; }, // whitespace before catchall
                 s if s.is_alphabetic() => {
                     let token = self.lex_word();
@@ -62,7 +64,7 @@ impl Lexer {
             Err(_) => {
                 error_print(
                     errorutils::ErrorCodes::ErrorUnexpected,
-                    Some(&format!("This is probably the compiler's fault")),
+                    Some(&("This is probably the compiler's fault").to_string()),
                 );
             }
         }
@@ -76,6 +78,7 @@ impl Lexer {
         }
         match word.as_str() {
             "fn" => LexTokens::Fn,
+            "sysexit" => LexTokens::SysExit,
             _ => LexTokens::Str(word),
         }
     }
@@ -94,8 +97,9 @@ impl fmt::Display for LexTokens {
             LexTokens::RBracket  => write!(f, "Right Bracket: '}}'"),
             LexTokens::LParen    => write!(f, "Left Paren: '('"),
             LexTokens::RParen    => write!(f, "Right Paren: ')'"),
+            LexTokens::SemiC     => write!(f, "Semi colon ';'"),
             LexTokens::Fn        => write!(f, "Keyword: 'fn'"),
-            LexTokens::KeyWord   => write!(f, "Keyword"),
+            LexTokens::SysExit   => write!(f, "Keyword: 'sysexit'"),
             LexTokens::Str(s)    => write!(f, "String: '{}'", s),
             LexTokens::Num(n)    => write!(f, "Number: '{}'", n),
         }
