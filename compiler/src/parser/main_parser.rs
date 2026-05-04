@@ -1,41 +1,60 @@
 use std::fmt;
 use crate::{lexer::main_lexer::LexTokens, utils::errorutils::{ErrorCodes, error_print}};
-
+#[derive(Clone)]
 pub enum TopLevelDecl {
-    Mainfuncton(Mainfuncton),
+    Mainfunction(Mainfuncton),
 }
 
+#[derive(Clone)]
 pub enum InLifeTime {
     B(Block),
     S(Statment),
 }
 
+#[derive(Clone)]
 pub enum Block {
     Func(Function),
     LT(LifeTime),
 }
 
-pub enum Statment {}
+#[derive(Clone)]
+pub enum Statment {
+    SystemExit(SystemEx),
+}
 
+#[derive(Clone)]
 pub enum Expr {
     StrLit(StrLit),
+    Number(Num)
 }
 
+#[derive(Clone)]
+pub struct SystemEx {
+    pub value: Expr,
+}
+#[derive(Clone)]
 pub struct Mainfuncton {
-    inside: Function,
+    pub inside: Function,
 }
 
+#[derive(Clone)]
 pub struct Function {
-    name: Expr,
-    body: LifeTime,
+    pub name: Expr,
+    pub body: LifeTime,
 }
 
+#[derive(Clone)]
 pub struct StrLit {
-    name: String,
+    pub name: String,
+}
+#[derive(Clone, Copy)]
+pub struct Num {
+    pub value: i32,
 }
 
+#[derive(Clone)]
 pub struct LifeTime {
-    body: Vec<InLifeTime>,
+    pub body: Vec<InLifeTime>,
 }
 
 pub struct Parser {
@@ -56,7 +75,7 @@ impl Parser {
 
     fn parse_top_level_decl(&mut self) -> TopLevelDecl {
         if self.get_token() == LexTokens::Fn {
-            TopLevelDecl::Mainfuncton(Mainfuncton { inside: self.parse_function() })
+            TopLevelDecl::Mainfunction(Mainfuncton { inside: self.parse_function() })
         } else {
             error_print(ErrorCodes::ErrorNoEntryPoint, Some(&"Program has no function declaration on first line".to_string()));
         }
@@ -89,13 +108,34 @@ impl Parser {
                 self.next_token(); // skip '{'
                 InLifeTime::B(Block::LT(self.parse_lifetime()))
             },
-            _ => error_print(ErrorCodes::ErrorInvalidInLifetimeStatment, Some(&("Invalid statement in lifetime").to_string())),
+            _ => {
+                let current_statment = self.parse_statment();
+                match current_statment {
+                    Statment::SystemExit(s) => {
+                        InLifeTime::S(Statment::SystemExit(s))
+                    }
+                }
+            }
         }
     }
-
+    fn parse_statment(&mut self) -> Statment {
+        match self.get_token() {
+            LexTokens::SysExit => {
+                self.next_token();
+                self.assert_next_token(LexTokens::LParen);
+                let value = self.parse_expr();
+                self.next_token();
+                self.assert_next_token(LexTokens::RParen);
+                self.assert_next_token(LexTokens::SemiC);
+                Statment::SystemExit(SystemEx { value })
+            }
+            _ => error_print(ErrorCodes::ErrorParsingError, Some(&("Not a statment").to_string())),
+        }
+    }
     fn parse_expr(&mut self) -> Expr {
         match self.get_token() {
             LexTokens::Str(s) => Expr::StrLit(StrLit { name: s }),
+            LexTokens::Num(n) => Expr::Number(Num { value: n }),
             _ => error_print(ErrorCodes::ErrorInvalidExpretion, Some(&("Expression not handled").to_string())),
         }
     }
@@ -127,7 +167,7 @@ impl Parser {
 impl fmt::Display for TopLevelDecl {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TopLevelDecl::Mainfuncton(m) => write!(f, "{}", m.inside),
+            TopLevelDecl::Mainfunction(m) => write!(f, "{}", m.inside),
         }
     }
 }
@@ -142,6 +182,7 @@ impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Expr::StrLit(s) => write!(f, "{}", s.name),
+            Expr::Number(n) => write!(f, "{}", n.value),
         }
     }
 }
@@ -160,7 +201,7 @@ impl fmt::Display for InLifeTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             InLifeTime::B(b) => write!(f, "{}", b),
-            InLifeTime::S(_) => write!(f, "<statement>"),
+            InLifeTime::S(s) => write!(f, "{}", s),
         }
     }
 }
@@ -170,6 +211,13 @@ impl fmt::Display for Block {
         match self {
             Block::Func(func) => write!(f, "{}", func),
             Block::LT(lt)     => write!(f, "{}", lt),
+        }
+    }
+}
+impl fmt::Display for Statment {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Statment::SystemExit(s) => write!(f, "sysexit({});", s.value)
         }
     }
 }

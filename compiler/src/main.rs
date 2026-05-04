@@ -1,4 +1,7 @@
 use std::{env, fs};
+mod asm_generator {
+    pub mod main_asm_generator;
+}
 mod parser {
     pub mod main_parser;
 }
@@ -27,8 +30,14 @@ fn main() {
     println!("{}", contents);
     let mut lexer = lexer::main_lexer::Lexer::new(contents.clone());
     lexer.lex();
+    println!("\nLexer interpretation:\n");
     lexer.print();
     let mut parser = parser::main_parser::Parser::new(lexer.lex_tokens);
     parser.parse();
+    println!("\nParser interpretation:\n");
     parser.print();
+    let mut asm_generator = asm_generator::main_asm_generator::AsmGenerator::new(parser.parse_tokens);
+    asm_generator.generate();
+    println!("\nGenerated assembly:\n");
+    asm_generator.print();
 }
