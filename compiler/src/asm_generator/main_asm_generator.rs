@@ -14,35 +14,32 @@ impl AsmGenerator {
                                          // file tree for funzies
             None => error_print(ErrorCodes::ErrorNoEntryPoint, Some(&("While generating assembly found out that file is empty").to_string())),
             Some(t) => {
-                self.generate_pre_code();
                 self.generate_from_top_level_decl(t.clone());
             }
         }
     }
-    fn write_to_source_data(&mut self) {
-    }
     fn write_to_source(&mut self, line: String) {
         self.source_code.push(format!("{}{}", " ".repeat(self.indent), line));
     }
-    fn generate_pre_code(&mut self) {
-        self.write_to_source("global _start".to_string());
-        self.write_to_source("section .data".to_string());
-        self.write_to_source_data();
-        self.write_to_source("section .text".to_string());
-    }
     // I should implement a table of registers to keep track of their values instead of xoring them
     // every time.
-    
+
     // Also This whole file will need to be re-written as soon as I start implementing binary
     // expresions that colapse into values.
     fn generate_statment(&mut self, s: Statment) {
         match s {
             Statment::SystemExit(n) => {
-                self.write_to_source("xor rax, rax".to_string());
-                self.write_to_source("xor rdi, rdi".to_string());
-                self.write_to_source("mov rax, 60".to_string());
-                self.write_to_source(format!("mov rdi, {}", n.value));
-                self.write_to_source("syscall".to_string());
+                match n.value {
+                    Expr::StrLit(_) => error_print(ErrorCodes::ErrorUnexpected, Some(&"The value is an string, found out in generation process".to_string())),
+                    Expr::Number(nu) => {
+                        if nu.value >= 256 {
+                            error_print(ErrorCodes::ErrorToBigReturnValue,Some(&format!("return value is {} when the max is 255", n.value)));
+                        }
+                        self.write_to_source("MOV 0->RARX".to_string());
+                        self.write_to_source(format!("MOV {}->RBRX", n.value));
+                        self.write_to_source("SYSC".to_string());
+                    }
+                }
 
             }
         }

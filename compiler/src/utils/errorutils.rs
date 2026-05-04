@@ -9,6 +9,7 @@ pub enum ErrorCodes {
     ErrorInvalidExpretion,
     ErrorAsertionFailed,
     ErrorInvalidInLifetimeStatment,
+    ErrorToBigReturnValue,
 }
 pub fn error_print(code: ErrorCodes, additional_info: Option<&String>) -> ! {
     match code {
@@ -22,5 +23,6 @@ pub fn error_print(code: ErrorCodes, additional_info: Option<&String>) -> ! {
         ErrorCodes::ErrorInvalidExpretion               => { println!("error while parsing expresion"); println!("{:?}", additional_info); std::process::exit(1)}
         ErrorCodes::ErrorAsertionFailed                 => { println!("Some Assert statment failed"); println!("{:?}", additional_info); std::process::exit(1)}
         ErrorCodes::ErrorInvalidInLifetimeStatment      => { println!("Invalid statment in lifetime"); println!("{:?}", additional_info); std::process::exit(1)}
+        ErrorCodes::ErrorToBigReturnValue               => { println!("return value of the program is to big"); println!("{:?}", additional_info); std::process::exit(1)}
     }
 }
