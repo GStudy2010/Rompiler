@@ -1,4 +1,7 @@
 use std::{env, fs};
+mod asm_generator {
+    pub mod main_asm_generator;
+}
 mod parser {
     pub mod main_parser;
 }
@@ -33,4 +36,8 @@ fn main() {
     parser.parse();
     println!("\nParser interpretation:\n");
     parser.print();
+    let mut asm_generator = asm_generator::main_asm_generator::AsmGenerator::new(parser.parse_tokens);
+    asm_generator.generate();
+    println!("\nGenerated assembly:\n");
+    asm_generator.print();
 }

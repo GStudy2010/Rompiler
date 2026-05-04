@@ -1,51 +1,60 @@
 use std::fmt;
 use crate::{lexer::main_lexer::LexTokens, utils::errorutils::{ErrorCodes, error_print}};
-
+#[derive(Clone)]
 pub enum TopLevelDecl {
-    Mainfuncton(Mainfuncton),
+    Mainfunction(Mainfuncton),
 }
 
+#[derive(Clone)]
 pub enum InLifeTime {
     B(Block),
     S(Statment),
 }
 
+#[derive(Clone)]
 pub enum Block {
     Func(Function),
     LT(LifeTime),
 }
 
+#[derive(Clone)]
 pub enum Statment {
     SystemExit(SystemEx),
 }
 
+#[derive(Clone)]
 pub enum Expr {
     StrLit(StrLit),
     Number(Num)
 }
 
+#[derive(Clone)]
 pub struct SystemEx {
-    value: Expr,
+    pub value: Expr,
 }
-
+#[derive(Clone)]
 pub struct Mainfuncton {
-    inside: Function,
+    pub inside: Function,
 }
 
+#[derive(Clone)]
 pub struct Function {
-    name: Expr,
-    body: LifeTime,
+    pub name: Expr,
+    pub body: LifeTime,
 }
 
+#[derive(Clone)]
 pub struct StrLit {
-    name: String,
+    pub name: String,
 }
+#[derive(Clone, Copy)]
 pub struct Num {
-    value: i32,
+    pub value: i32,
 }
 
+#[derive(Clone)]
 pub struct LifeTime {
-    body: Vec<InLifeTime>,
+    pub body: Vec<InLifeTime>,
 }
 
 pub struct Parser {
@@ -66,7 +75,7 @@ impl Parser {
 
     fn parse_top_level_decl(&mut self) -> TopLevelDecl {
         if self.get_token() == LexTokens::Fn {
-            TopLevelDecl::Mainfuncton(Mainfuncton { inside: self.parse_function() })
+            TopLevelDecl::Mainfunction(Mainfuncton { inside: self.parse_function() })
         } else {
             error_print(ErrorCodes::ErrorNoEntryPoint, Some(&"Program has no function declaration on first line".to_string()));
         }
@@ -158,7 +167,7 @@ impl Parser {
 impl fmt::Display for TopLevelDecl {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TopLevelDecl::Mainfuncton(m) => write!(f, "{}", m.inside),
+            TopLevelDecl::Mainfunction(m) => write!(f, "{}", m.inside),
         }
     }
 }
