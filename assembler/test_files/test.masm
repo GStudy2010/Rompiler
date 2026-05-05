@@ -1,0 +1,9 @@
+/*
+Some comments
+*/
+// Also a comment
+
+_start:
+  MOV 10->RBRX
+  MOV 0->RARX
+  SYSC
